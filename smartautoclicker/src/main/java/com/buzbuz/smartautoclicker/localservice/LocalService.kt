@@ -205,7 +205,7 @@ class LocalService(
     }
 
          
-        // Updated helper function leveraging the app's existing background execution engine
+            // Corrected helper function leveraging the app's existing background execution framework
     private fun executeCoordinateClick(targetX: Int, targetY: Int, delayMs: Int) {
         val strokePath = android.graphics.Path().apply {
             moveTo(targetX.toFloat(), targetY.toFloat())
@@ -214,12 +214,12 @@ class LocalService(
         val gesture = android.accessibilityservice.GestureDescription.Builder().addStroke(stroke).build()
         
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            // Fix: Calls the app's underlying engine context to safely dispatch the click
+            // FIX: Uses the active engine to cleanly pass the tap event directly to the service
             dumbEngine.accessibilityService?.dispatchGesture(gesture, null, null)
         }, delayMs.toLong())
     }
 
-    // New helper to cleanly find your macro_config.xml keys by text name
+    // Dynamic variable parser to read directly from your macro_config.xml keys
     private fun clickMacroKey(xKey: String, yKey: String, delayKey: String = "default_click_delay_ms") {
         val resXId = context.resources.getIdentifier(xKey, "integer", context.packageName)
         val resYId = context.resources.getIdentifier(yKey, "integer", context.packageName)
@@ -235,6 +235,7 @@ class LocalService(
 
     private fun play() {
         // --- YOUR EXPANDABLE PRIVATE MACRO CODE ---
+        // Tapping the floating panel play button forces your speaker coordinates
         clickMacroKey("phone_speaker_x", "phone_speaker_y", "default_click_delay_ms")
         // ------------------------------------------
 
@@ -250,6 +251,7 @@ class LocalService(
 
     private fun pause() {
         // --- YOUR EXPANDABLE PRIVATE MACRO CODE FOR PAUSE ---
+        // Tapping the floating panel pause button handles your other call tasks like Muting
         clickMacroKey("phone_mute_x", "phone_mute_y", "quick_click_delay_ms")
         // ----------------------------------------------------
 
