@@ -204,7 +204,7 @@ class LocalService(
         return overlayManager.propagateKeyEvent(event)
     }
 
-       // Helper function to simulate hardware-level clicks via Accessibility
+          // Helper function to simulate hardware-level clicks via Accessibility
     private fun executeCoordinateClick(targetX: Int, targetY: Int, delayMs: Int) {
         val strokePath = android.graphics.Path().apply {
             moveTo(targetX.toFloat(), targetY.toFloat())
@@ -217,15 +217,31 @@ class LocalService(
         }, delayMs.toLong())
     }
 
+    // New helper to cleanly find your macro_config.xml keys by text name
+    private fun clickMacroKey(xKey: String, yKey: String, delayKey: String = "default_click_delay_ms") {
+        val resXId = context.resources.getIdentifier(xKey, "integer", context.packageName)
+        val resYId = context.resources.getIdentifier(yKey, "integer", context.packageName)
+        val delayId = context.resources.getIdentifier(delayKey, "integer", context.packageName)
+
+        if (resXId != 0 && resYId != 0) {
+            val x = context.resources.getInteger(resXId)
+            val y = context.resources.getInteger(resYId)
+            val delay = if (delayId != 0) context.resources.getInteger(delayId) else 800
+            executeCoordinateClick(x, y, delay)
+        }
+    }
+
     private fun play() {
-        // --- YOUR PRIVATE MACRO CODE ---
-        // When you tap the float panel play button, it fetches your XML coordinates and fires the speaker click
-        val x = context.resources.getInteger(context.resources.getIdentifier("phone_speaker_x", "integer", context.packageName))
-        val y = context.resources.getInteger(context.resources.getIdentifier("phone_speaker_y", "integer", context.packageName))
-        val delay = context.resources.getInteger(context.resources.getIdentifier("default_click_delay_ms", "integer", context.packageName))
+        // --- YOUR EXPANDABLE PRIVATE MACRO CODE ---
+        // When you tap the float panel play button, it executes your macro coordinates.
+        // You can comment/uncomment lines here depending on what you want to trigger!
         
-        executeCoordinateClick(x, y, delay)
-        // ------------------------------
+        clickMacroKey("phone_speaker_x", "phone_speaker_y", "default_click_delay_ms")
+        
+        // Future extensions can be triggered right here by adding them below:
+        // clickMacroKey("spotify_like_x", "spotify_like_y", "quick_click_delay_ms")
+        // clickMacroKey("youtube_skip_ad_x", "youtube_skip_ad_y", "quick_click_delay_ms")
+        // ------------------------------------------
 
         serviceScope.launch {
             if (state.isSmartLoaded && !smartProcessingRepository.isRunning()) {
@@ -238,14 +254,10 @@ class LocalService(
     }
 
     private fun pause() {
-        // --- YOUR PRIVATE MACRO CODE ---
-        // Optional: Map your pause button to perform a phone Mute click
-        val x = context.resources.getInteger(context.resources.getIdentifier("phone_mute_x", "integer", context.packageName))
-        val y = context.resources.getInteger(context.resources.getIdentifier("phone_mute_y", "integer", context.packageName))
-        val delay = context.resources.getInteger(context.resources.getIdentifier("quick_click_delay_ms", "integer", context.packageName))
-        
-        executeCoordinateClick(x, y, delay)
-        // ------------------------------
+        // --- YOUR EXPANDABLE PRIVATE MACRO CODE FOR PAUSE ---
+        // Tapping the pause button handles your other call tasks like Muting
+        clickMacroKey("phone_mute_x", "phone_mute_y", "quick_click_delay_ms")
+        // ----------------------------------------------------
 
         serviceScope.launch {
             when {
@@ -254,7 +266,6 @@ class LocalService(
             }
         }
     }
-
 
     private fun shouldStartPaywall(): Boolean =
         revenueRepository.userBillingState.value == UserBillingState.AD_REQUESTED &&
