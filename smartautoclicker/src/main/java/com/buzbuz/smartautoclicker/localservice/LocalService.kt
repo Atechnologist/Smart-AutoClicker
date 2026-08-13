@@ -204,7 +204,29 @@ class LocalService(
         return overlayManager.propagateKeyEvent(event)
     }
 
+       // Helper function to simulate hardware-level clicks via Accessibility
+    private fun executeCoordinateClick(targetX: Int, targetY: Int, delayMs: Int) {
+        val strokePath = android.graphics.Path().apply {
+            moveTo(targetX.toFloat(), targetY.toFloat())
+        }
+        val stroke = android.accessibilityservice.GestureDescription.StrokeDescription(strokePath, 0, 50)
+        val gesture = android.accessibilityservice.GestureDescription.Builder().addStroke(stroke).build()
+        
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            dispatchGesture(gesture, null, null)
+        }, delayMs.toLong())
+    }
+
     private fun play() {
+        // --- YOUR PRIVATE MACRO CODE ---
+        // When you tap the float panel play button, it fetches your XML coordinates and fires the speaker click
+        val x = context.resources.getInteger(context.resources.getIdentifier("phone_speaker_x", "integer", context.packageName))
+        val y = context.resources.getInteger(context.resources.getIdentifier("phone_speaker_y", "integer", context.packageName))
+        val delay = context.resources.getInteger(context.resources.getIdentifier("default_click_delay_ms", "integer", context.packageName))
+        
+        executeCoordinateClick(x, y, delay)
+        // ------------------------------
+
         serviceScope.launch {
             if (state.isSmartLoaded && !smartProcessingRepository.isRunning()) {
                 if (shouldStartPaywall()) startPaywall()
@@ -216,6 +238,15 @@ class LocalService(
     }
 
     private fun pause() {
+        // --- YOUR PRIVATE MACRO CODE ---
+        // Optional: Map your pause button to perform a phone Mute click
+        val x = context.resources.getInteger(context.resources.getIdentifier("phone_mute_x", "integer", context.packageName))
+        val y = context.resources.getInteger(context.resources.getIdentifier("phone_mute_y", "integer", context.packageName))
+        val delay = context.resources.getInteger(context.resources.getIdentifier("quick_click_delay_ms", "integer", context.packageName))
+        
+        executeCoordinateClick(x, y, delay)
+        // ------------------------------
+
         serviceScope.launch {
             when {
                 dumbEngine.isRunning.value -> dumbEngine.stopDumbScenario()
@@ -223,6 +254,7 @@ class LocalService(
             }
         }
     }
+
 
     private fun shouldStartPaywall(): Boolean =
         revenueRepository.userBillingState.value == UserBillingState.AD_REQUESTED &&
